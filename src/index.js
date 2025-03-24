@@ -17,7 +17,7 @@ export default {
         if (url.pathname.startsWith('/static')) return env.ASSETS.fetch(request)
         switch (url.pathname) {
             case '/config':
-                return getConfig(env)
+                return await getConfig(env)
             case '/searchBlogs':
                 return fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
         }
@@ -82,9 +82,11 @@ async function go(env, postAt) {
 	})
 }
 
-function getConfig(env) {
+async function getConfig(env) {
+    const response = await fetch(`https://${env.API_HOST}/xrpc/app.bsky.actor.getProfile?actor=${env.DID}`)
+    const data = await response.json()
     return json({
-        'handle': env.HANDLE,
+        ...data,
         'gate_host': env.GATE_HOST,
         'search_page_size': env.SEARCH_PAGE_SIZE,
         'web_app_title': env.WEB_APP_TITLE
