@@ -14,26 +14,63 @@ export default {
         }
 
         // blog service
-        if (isTid(url.pathname)) {
-            url.pathname = 'article.html'
-            return env.ASSETS.fetch(new Request(url.toString()))
-        }
-
+        if (url.pathname.startsWith('/static')) return env.ASSETS.fetch(request)
         switch (url.pathname) {
             case '/config':
                 return getConfig(env)
-            case '/':
-            case '/search':
-                url.pathname = '/search.html'
-                return env.ASSETS.fetch(new Request(url.toString()))
-            case '/about':
-                return env.ASSETS.fetch(request)
-            default:
-                url.pathname = '404'
-                return env.ASSETS.fetch(new Request(url.toString()));
+            case '/searchBlogs':
+                return fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
         }
-	},
+        const res = await handleBlogHTMLRequest(request, env, url)
+        const rewriter = new HTMLRewriter().on('head', new HeadRewriter(request, env)).on('footer', new FooterRewriter(request, env))
+        return rewriter.transform(res)
+    }
 };
+
+class HeadRewriter {
+  constructor(request, env) {
+    this.request = request
+    this.env = env
+  }
+ 
+  element(element) {
+    element.append(`
+<meta content='${this.env.WEB_APP_TITLE}' name='application-name'/>
+<meta content='${this.env.WEB_APP_TITLE}' name='apple-mobile-web-app-title'/>
+<meta content='${this.env.WEB_PAGE_CONTENT_LANGUAGE}' http-equiv='Content-Language'/>
+    `, { html: true })
+  }
+}
+
+class FooterRewriter {
+    constructor(request, env) {
+        this.request = request
+        this.env = env
+    }
+
+    element(element) {
+        element.setInnerContent(this.env.WEB_PAGE_FOOTER)
+    }
+}
+
+function handleBlogHTMLRequest(request, env, url) {
+    if (isTid(url.pathname)) {
+        url.pathname = '/article.html'
+        return env.ASSETS.fetch(new Request(url.toString()))
+    }
+
+    switch (url.pathname) {
+        case '/':
+        case '/search':
+            url.pathname = '/search.html'
+            return env.ASSETS.fetch(new Request(url.toString()))
+        case '/about':
+            return env.ASSETS.fetch(request)
+        default:
+            url.pathname = '/404.html'
+            return env.ASSETS.fetch(new Request(url.toString()));
+    }
+}
 
 async function go(env, postAt) {
 	let [,, rkey] = postAt.slice('at://'.length).split('/')
@@ -49,7 +86,8 @@ function getConfig(env) {
     return json({
         'handle': env.HANDLE,
         'gate_host': env.GATE_HOST,
-        'list_page_size': env.LIST_PAGE_SIZE
+        'search_page_size': env.SEARCH_PAGE_SIZE,
+        'web_app_title': env.WEB_APP_TITLE
     })
 }
 
