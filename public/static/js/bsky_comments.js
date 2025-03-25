@@ -3,13 +3,13 @@ export class BlueskyComments extends HTMLElement {
       /** The URL of the Bluesky post to use as the parent */
       url: { type: String },
       // default to public.api.bsky.app
-      api_host: { type: String },
+      api_origin: { type: String },
       // default to bsky.app
       app_host: { type: String },
       // default to official mod and china-good-voice.bsky.social labeler
       labelers: { type: String },
     };
-  
+
     #observer;
     #loaded = false;
     #hiddenReplies = new Set();
@@ -34,17 +34,17 @@ export class BlueskyComments extends HTMLElement {
         --bluesky-spacing-lg: 15px;
         --bluesky-avatar-size: 24px;
         --bluesky-avatar-bg: #e0e0e0;
-  
+
         /* Comments Structure */
         --bluesky-reply-border-width: 2px;
-  
+
         /* Footer */
         --bluesky-footer-font-size: 15px;
         --bluesky-icon-size: 18px;
         --bluesky-border-color: #e0e0e0;
-  
+
       }
-  
+
       /* Container Styles */
       .comments {
         font-family: var(--bluesky-font-family);
@@ -53,7 +53,7 @@ export class BlueskyComments extends HTMLElement {
         border: 1px solid var(--bluesky-border-color);
         color: var(--bluesky-text-color);
       }
-  
+
       /* Comment Structure */
       .comment {
         border-bottom: 1px solid var(--bluesky-border-color);
@@ -71,21 +71,21 @@ export class BlueskyComments extends HTMLElement {
         height: calc(var(--bluesky-avatar-size)/2);
         color: gray;
       }
-  
+
       .comment.reply {
         border-left: var(--bluesky-reply-border-width) solid var(--bluesky-border-color);
         margin-left: var(--bluesky-spacing-lg);
       padding-top: var(--bluesky-spacing-xs);
       }
-  
+
       .comment:last-child {
         border-bottom: none;
       }
-  
+
     .comment-content {
       padding: var(--bluesky-spacing-xs) 0;
     }
-  
+
       .avatar {
         width: var(--bluesky-avatar-size);
         height: var(--bluesky-avatar-size);
@@ -93,22 +93,22 @@ export class BlueskyComments extends HTMLElement {
         object-fit: cover;
         border: 1px solid var(--bluesky-border-color);
       }
-  
+
       .default-avatar {
         width: var(--bluesky-avatar-size);
         height: var(--bluesky-avatar-size);
         border-radius: 50%;
         background-color: var(--bluesky-avatar-bg);
       }
-  
+
       .comment-header {
         display: flex;
         align-items: center;
         gap: var(--bluesky-spacing-md);
         padding: 0 var(--bluesky-spacing-lg);
       }
-  
-  
+
+
       .comment-footer {
         display: flex;
         justify-content: space-between;
@@ -118,13 +118,13 @@ export class BlueskyComments extends HTMLElement {
         color: var(--bluesky-footer-text-color);
         padding: var(--bluesky-spacing-xs);
       }
-  
+
       .comment-footer div {
         display: flex;
         align-items: center;
         gap: var(--bluesky-spacing-xs);
       }
-  
+
       .comment-link {
         display: flex;
         flex-direction: column;
@@ -132,32 +132,32 @@ export class BlueskyComments extends HTMLElement {
         text-decoration: none;
         padding: 0 var(--bluesky-spacing-lg);
       }
-  
+
       .profile-link {
         color: var(--bluesky-text-color);
           font-weight: 600;
         text-decoration: none;
       }
-  
+
       .timestamp-link,
       .handle-link {
         color: var(--bluesky-handle-color);
         text-decoration: none;
       }
-  
+
       .comment-link:hover,
       .comment-footer:hover {
         background-color: var(--bluesky-hover-bg);
       }
-  
+
       .profile-link:hover {
           text-decoration: underline;
       }
-  
+
       .handle {
         color: var(--bluesky-handle-color);
       }
-  
+
       .comment-footer svg {
         width: var(--bluesky-icon-size);
         height: var(--bluesky-icon-size);
@@ -179,15 +179,15 @@ export class BlueskyComments extends HTMLElement {
         { threshold: 0.1 },
       );
     }
-  
+
     connectedCallback() {
       this.#observer.observe(this);
     }
-  
+
     disconnectedCallback() {
       this.#observer.disconnect();
     }
-  
+
     async #loadComments() {
       const blueskyUrl = this.getAttribute("url");
       if (blueskyUrl) {
@@ -211,47 +211,47 @@ export class BlueskyComments extends HTMLElement {
           `<p>No Bluesky URL provided.</p>`;
       }
     }
-  
+
     async #resolvePostUrl(postUrl) {
       let atUri;
-  
+
       if (postUrl.startsWith("at:")) {
         return postUrl;
       }
-  
+
       if (!/https:\/\/.+?\/profile\/.+?\/post\/.+?/.test(postUrl)) {
         return undefined;
       }
-  
+
       const urlParts = new URL(postUrl).pathname.split("/");
       let did = urlParts[2];
       const postId = urlParts[4];
-  
+
       if (!did || !postId) {
         return undefined;
       }
-  
+
       if (!did.startsWith("did:")) {
         const cachedDid = this.#getCache(`handle:${did}`);
         if (cachedDid) {
           did = cachedDid;
         } else {
-          let instance = this.getAttribute('api_host') ?? 'api.bsky.app'
+          let instance = this.getAttribute('api_origin') ?? 'https://api.bsky.app'
           try {
-            const handleResolutionUrl = `https://${instance}/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(
+            const handleResolutionUrl = `${instance}/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(
               did,
             )}`;
             const handleResponse = await fetch(handleResolutionUrl);
-  
+
             if (!handleResponse.ok) {
               throw new Error("Failed to resolve handle");
             }
-  
+
             const handleData = await handleResponse.json();
             if (!handleData.did) {
               return undefined;
             }
-  
+
             this.#setCache(`handle:${did}`, handleData.did, 86400);
             did = handleData.did;
           } catch (e) {
@@ -260,21 +260,21 @@ export class BlueskyComments extends HTMLElement {
           }
         }
       }
-  
+
       atUri = `at://${did}/app.bsky.feed.post/${postId}`;
       return atUri;
     }
-  
+
     #setCache(key, value, ttl = 86400) {
       const expiry = Date.now() + ttl * 1000;
       const cacheData = { value, expiry };
       localStorage.setItem(key, JSON.stringify(cacheData));
     }
-  
+
     #getCache(key) {
       const cachedItem = localStorage.getItem(key);
       if (!cachedItem) return null;
-  
+
       const { value, expiry } = JSON.parse(cachedItem);
       if (Date.now() > expiry) {
         localStorage.removeItem(key);
@@ -282,10 +282,10 @@ export class BlueskyComments extends HTMLElement {
       }
       return value;
     }
-  
+
     async #fetchReplies(atUri) {
-      let instance = this.getAttribute("api_host") ?? 'api.bsky.app'
-      const apiUrl = `https://${instance}/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(
+      let instance = this.getAttribute("api_origin") ?? 'https://api.bsky.app'
+      const apiUrl = `${instance}/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(
         atUri,
       )}`;
       let headers = {'atproto-accept-labelers': this.getAttribute("lablers") ?? 'did:plc:ar7c4by46qjdydhdevvrndac;redact, did:plc:dya73iwnrfdedgadx3hrulzl'}
@@ -295,7 +295,7 @@ export class BlueskyComments extends HTMLElement {
       }
       return response.json();
     }
-  
+
     async #displayReplies(thread, container = null) {
       let instance = this.getAttribute("app_host") ?? 'bsky.app'
       const commentsContainer =
@@ -315,13 +315,13 @@ export class BlueskyComments extends HTMLElement {
           `<p>Be the first to <a href="https://${instance}/profile/${this.did}/post/${this.rkey}">comment</a>.</p>`;
       }
     }
-  
+
     #sanitizeText(text) {
       const div = document.createElement("div");
       div.textContent = text;
       return div.innerHTML;
     }
-  
+
     #displayComments(thread, container, isReply = false) {
       if (thread?.post?.author && thread.post.record) {
         // Skip if the post is hidden by the original poster or if it's just a pin emoji
@@ -331,13 +331,13 @@ export class BlueskyComments extends HTMLElement {
         ) {
           return;
         }
-  
+
         const commentDiv = document.createElement("div");
         commentDiv.classList.add("comment");
         if (isReply) {
           commentDiv.classList.add("reply");
         }
-  
+
         const authorHandle = thread.post.author.handle;
         let instance = this.getAttribute('app_host') ?? 'bsky.app'
         let isMod = thread.post.author.did === this.did
@@ -356,7 +356,7 @@ export class BlueskyComments extends HTMLElement {
         const likeCount = thread.post.likeCount || 0;
         const repostCount = thread.post.repostCount || 0;
         const replyCount = thread.post.replyCount || 0;
-  
+
         let avatarElement;
         if (avatarUrl) {
           avatarElement = `<img src="${avatarUrl}" alt="${authorHandle}'s avatar" class="avatar" part="avatar"/>`;
@@ -401,9 +401,9 @@ export class BlueskyComments extends HTMLElement {
             </a>
           </div>
         `;
-  
+
         container.appendChild(commentDiv);
-  
+
         if (thread.replies && thread.replies.length > 0) {
           const sortedReplies = thread.replies.sort((a, b) => {
             return (
@@ -417,7 +417,7 @@ export class BlueskyComments extends HTMLElement {
         }
       }
     }
-  
+
     #getAbbreviatedTime(date) {
       const now = new Date().getTime();
       const diffMs = now - date;
@@ -425,7 +425,7 @@ export class BlueskyComments extends HTMLElement {
       const diffMinutes = Math.floor(diffSeconds / 60);
       const diffHours = Math.floor(diffMinutes / 60);
       const diffDays = Math.floor(diffHours / 24);
-  
+
       if (diffDays > 0) {
         return `${diffDays}d`;
       } else if (diffHours > 0) {

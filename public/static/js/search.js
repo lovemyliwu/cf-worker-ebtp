@@ -1,0 +1,180 @@
+import * as utils from '/static/js/common.js'
+const response = await fetch('/config')
+const config = await response.json()
+let url = new URL(location.href)
+
+function search(url) {
+    if (url.searchParams.get('q')) {
+        renderKeywordSearch(url)
+    } else if (url.searchParams.get('tag')) {
+        renderTagSearch(url)
+    } else {
+        location.href = '/'
+    }
+}
+
+function getSearchUrl(q) {
+    return `/xrpc/app.bsky.feed.searchPosts?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`
+}
+
+async function renderTagSearch(url) {
+    utils.renderTitle(`Tag:${url.searchParams.get('tag')}`)
+    const q = `#${url.searchParams.get('tag')} from:${config.handle}`
+    const search_url = getSearchUrl(q)
+    await renderSearch(search_url)
+}
+
+async function renderKeywordSearch(url) {
+    utils.renderTitle(`Keyword:${url.searchParams.get('q')}`)
+    const q = `${url.searchParams.get('q')} from:${config.handle}`
+    const search_url = getSearchUrl(q)
+    await renderSearch(search_url)
+}
+
+async function renderSearch(search_url, ) {
+    const response = await fetch(search_url)
+    const data = await response.json()
+    renderBlogPosts(data.posts, 0)
+    utils.renderAvatar(config)
+    utils.renderJSONLD({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": document.querySelector('title').innerText,
+        "description": "符合搜索条件的文章列表",
+        "itemListElement": data.posts.map(post => {
+            const rkey = post.uri.split('/').pop()
+            const external = post.record.embed.external
+            const {
+                title,
+                description
+            } = external
+            const date = post.record.createdAt
+            const author = post.author.displayName
+            return {
+                "@type": "ListItem",
+                "item": {
+                    "@type": "Article",
+                    "mainEntityOfPage": `${location.origin}/${rkey}`,
+                    "headline": title,
+                    "datePublished": date,
+                    "dateModified": date,
+                    "author": [{
+                        "@type": "Person",
+                        "name": author,
+                        "url": `${location.origin}/about`
+                    }]
+                }
+            }
+        })
+    })
+}
+
+async function renderIndexPage(url) {
+    const q = `from:${config.handle}`
+    const search_url = getSearchUrl(q)
+    const response = await fetch(search_url.toString())
+    const data = await response.json()
+    renderBlogPosts(data.posts, 0)
+    utils.renderAvatar(config)
+    utils.renderJSONLD({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": config.web_app_title,
+        "url": `${location.origin}`,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": `${location.origin}/search?q={search_term}`,
+            "query-input": "required name=search_term"
+        }
+    })
+}
+
+function renderBlogPosts(allPosts, cursor) {
+    if (!allPosts.length) {
+        document.querySelector('#postsContainer').innerHTML = '<div class="rich_media_area_primary">没有找到任何文章，<a href="/">回到主页</a></div>'
+        document.querySelector('.navigator').style.display = 'none'
+        return
+    }
+
+    const posts = allPosts.slice(cursor, cursor + config.search_page_size)
+    let articleList = []
+    for (let post of posts) {
+        const external = post.record.embed.external
+        let {
+            title,
+            description
+        } = external
+        title += post.no
+        const date = post.record.createdAt
+        let tags = post.record.facets.map(item => item.features[0]).filter(item => item.$type === 'app.bsky.richtext.facet#tag').map(item => item.tag)
+        tags = tags.map(utils.renderTagSegment).join('')
+        const rkey = post.uri.split('/').pop()
+        const author = post.author.displayName
+        const ele = utils.convertStringToTemplate(articleTemplate, {
+            title,
+            date,
+            author,
+            description,
+            tags,
+            rkey
+        })
+        articleList.push(ele)
+    }
+    document.querySelector('#postsContainer').innerHTML = articleList.join('')
+
+    if ((allPosts.length - 1) > (cursor + config.search_page_size)) {
+        document.querySelector('#nextCursor').onclick = event => {
+            renderBlogPosts(allPosts, cursor + config.search_page_size);
+        }
+        document.querySelector('#nextCursor').style.display = 'inline'
+    } else {
+        document.querySelector('#nextCursor').style.display = 'none'
+    }
+
+    if (cursor > 0) {
+        document.querySelector('#preCursor').onclick = event => {
+            renderBlogPosts(allPosts, Math.max(cursor - config.search_page_size, 0));
+        }
+        document.querySelector('#preCursor').style.display = 'inline'
+    } else {
+        document.querySelector('#preCursor').style.display = 'none'
+    }
+}
+
+const articleTemplate = `
+<div class="rich_media_area_primary">
+<h2 class="rich_media_title">
+\${title}
+</h2>
+<div class="rich_media_meta_list">
+<em class="rich_media_meta rich_media_meta_text">
+\${date}
+</em>
+<em class="rich_media_meta rich_media_meta_link rich_media_meta_nickname">
+\${author}
+</em>
+</div>
+<div class="markdown-body">
+\${description}
+</div>
+<div class="rich_media_tool">
+<div class="media_tool_meta tips_global meta_primary" style="">标签：</div>
+\${tags}
+<a class="media_tool_meta tips_global meta_extra" href="/\${rkey}" title="\${title}">
+阅读全文 »
+</a>
+</div>
+</div>
+`
+
+switch (url.pathname) {
+    case '/':
+        renderIndexPage(url)
+        break
+    case '/search':
+        search(url)
+        break
+    default:
+        location.href = '/'
+}
+await utils.initBackgroundPic();
