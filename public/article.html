@@ -1,63 +1,101 @@
+
 <!DOCTYPE html>
-<html class='v2' dir='ltr' itemscope='' itemtype='http://schema.org/Blog' lang='zh-cn' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<html lang='zh-CN'>
 <head>
-<!-- base meta -->
-<meta charset='utf-8'/>
-<meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-<meta content='zh-cn' http-equiv='Content-Language'/>
-<link href='/favicon.ico' rel='icon' type='image/x-icon'/>
-<meta content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui' name='viewport'/>
-<meta content='yes' name='mobile-web-app-capable'/>
-<meta content='yes' name='apple-mobile-web-app-capable'/>
-<meta content='Smite Blogger' name='application-name'/>
-<meta content='Smite Blogger' name='apple-mobile-web-app-title'/>
-<meta content='black' name='apple-mobile-web-app-status-bar-style'/>
-<meta content='#fff' name='theme-color'/>
-<meta content='no' name='msapplication-tap-highlight'/>
-<link href="https://www.smitechow.com/" pt='index' rel='canonical' />
-<meta content='Smite Chow的后花园，各种花花草草，各种闲情逸致。' name='description'/>
-<title>blog article page</title>
-<meta content='blogger' name='generator'/>
-<link href='/' rel='home'/>
-<link href='/' rel='msapplication-starturl'/>
-<link href='//static.smitechow.com/images/avator.jpg' rel='icon'/>
-<link href='//static.smitechow.com/images/avator.jpg' rel='apple-touch-icon-precomposed'/>
-<link href='//static.smitechow.com/stylesheets/www.smitechow.com.css' rel='stylesheet'/>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='/static/img/avatar.jpg' rel='shortcut icon'>
+  <title>blog article page</title>
+  <link href='/static/css/blog.css' rel='stylesheet'>
+  <meta name="generator" content="ebtp">
 </head>
 <body class='rich_media rich_media_inner'>
-<div class='page-content footer-push section' id='container'>
-</div>
-<div class='rich_media_tool navigator'>
-<div class='media_tool_meta tips_global meta_primary'>
-                导航&#65306;
-              </div>
-<a href="https://www.smitechow.com/search?updated-max=2024-02-04T04:00:00%2B08:00&max-results=3">
-              &#8592;
-              较旧的博文
-</a>
-<a class='tips_global meta_extra' href='#'>
-                &#8593;回到页顶
-              </a>
-</div>
+  <div class='page-content footer-push section' id='container'>
+    <div id="postsContainer">loading...</div>
+    <div class='rich_media_tool navigator'>
+      <div class='media_tool_meta tips_global meta_primary'>导航：</div>
+      <a id="goHome" href="/">返回主页</a>
+      <a id="goComment" href="#">加入讨论...</a>
+      <a class='tips_global meta_extra' href='#'>↑回到页顶</a>
+    </div>
+    <div id="comments"></div>
+    <div class='footer-pad'></div>
+  </div>
+  <div class='qr_code_pc_outer'>
+    <div class='qr_code_pc_inner'>
+      <div class='qr_code_pc'>
+      <div id="actoravatar" class='qr_code_pc_img'></div>
+      <a id="actorDisplayName" href="/about"></a>
+      </div>
+    </div>
+  </div>
+  <footer>Power by atproto & ebtp</footer>
+  <script type="module">
+  import * as utils from '/static/js/common.js'
+  import '/static/js/bsky_comments.js'
+  const response = await fetch('/config')
+  const config = await response.json()
+  let url = new URL(location.href)
 
-<div class='footer-pad'>
+  renderArticle(url)
+  await utils.initBackgroundPic();
+
+  const template = `
+<div class="rich_media_area_primary">
+<h2 class="rich_media_title">
+\${title}
+</h2>
+<div class="rich_media_meta_list">
+<em class="rich_media_meta rich_media_meta_text">
+\${date}
+</em>
+<em class="rich_media_meta rich_media_meta_link rich_media_meta_nickname">
+\${author}
+</em>
 </div>
-</div></div>
-<div class='qr_code_pc_outer'>
-<div class='qr_code_pc_inner'>
-<div class='qr_code_pc'>
-<div class='qr_code_pc_img'></div>
-<p>
-            Smite Chow
-          </p>
+<div class="markdown-body">
+\${content}
 </div>
+<div class="rich_media_tool">
+<div class="media_tool_meta tips_global meta_primary">标签：</div>
+\${tags}
 </div>
-</div>
-<footer>
-      &#169; 2025 Smite Chow, Write with &#10084;&#65039;&#65039; Power by atproto & ebtp
-</footer>
-<script async='async' src='//static.smitechow.com/scripts/www.smitechow.com.js' type='module'></script>
-<script type="module">
-</script>
+</div>`
+  async function renderArticle(url) {
+    const rkey = url.pathname.slice(1)
+    const response = await fetch(`/data?rkey=${rkey}`)
+    const data = await response.json()
+    const meta = data.record.embed.external.meta
+
+    if (data.error) throw Error(data.message)
+
+    utils.renderTitle(meta.title)
+    const tags = [...meta.categories, ...meta.tags]
+    document.querySelector('#postsContainer').innerHTML = utils.convertStringToTemplate(template, {...meta, tags: tags.map(utils.renderTagSegment).join(''), content: data.blog})
+    document.querySelector('#goComment').setAttribute('href', `https://${config.app_host}/profile/${config.handle}/post/${rkey}`)
+		const postAt = `at://${config.did}/app.bsky.feed.post/${rkey}`
+		let ele = document.createElement('bluesky-comments')
+		ele.setAttribute('url', postAt)
+    ele.setAttribute('api_host', config.api_host)
+    ele.setAttribute('app_host', config.app_host)
+		document.querySelector('#comments').appendChild(ele)
+    
+    utils.renderAvatar(config)
+    utils.renderJSONLD({
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": meta.title,
+      "datePublished": meta.date,
+      "dateModified": meta.date,
+      "description": meta.excerpt,
+      "author": [{
+        "@type": "Person",
+        "name": meta.author,
+        "url": `https://${config.blog_host}/about`
+      }]
+    })
+  }
+  </script>
 </body>
 </html>

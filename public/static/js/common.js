@@ -12,3 +12,24 @@ export function convertStringToTemplate(templateString, context) {
 		return key in context ? context[key] : match;
 	});
 }
+
+export function renderTitle(title) {
+	document.querySelector('title').innerText = convertStringToTemplate(document.querySelector('title').innerText, {title})
+}
+
+export function renderTagSegment(tag) {
+  return `<a class="meta_original_tag" href="/search?tag=${encodeURIComponent(tag)}">${tag}</a>`
+}
+
+export function renderAvatar(config) {
+  document.querySelector('#actoravatar').style.background = `url(${config.avatar}) no-repeat`
+  document.querySelector('#actoravatar').style.backgroundSize = 'cover'
+  document.querySelector('#actorDisplayName').innerText = config.displayName
+}
+
+export function renderJSONLD(data) {
+    const script = document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }

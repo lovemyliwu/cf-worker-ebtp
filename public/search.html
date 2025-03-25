@@ -61,19 +61,15 @@
     return new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
   }
 
-  function renderTitle(title) {
-    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title})
-  }
-
   async function renderTagSearch(url) {
-    renderTitle(`Tag:${url.searchParams.get('tag')}`)
+    utils.renderTitle(`Tag:${url.searchParams.get('tag')}`)
     const q = `#${url.searchParams.get('tag')} from:${config.handle}`
     const search_url = getSearchUrl(q)
     await renderSearch(search_url)
   }
 
   async function renderKeywordSearch(url) {
-    renderTitle(`Keyword:${url.searchParams.get('q')}`)
+    utils.renderTitle(`Keyword:${url.searchParams.get('q')}`)
     const q = `${url.searchParams.get('q')} from:${config.handle}`
     const search_url = getSearchUrl(q)
     await renderSearch(search_url)
@@ -83,8 +79,8 @@
     const response = await fetch(search_url.toString())
     const data = await response.json()
     renderBlogPosts(data.posts, 0)
-    renderAvatar()
-    renderJSONLD({
+    utils.renderAvatar(config)
+    utils.renderJSONLD({
       "@context": "https://schema.org",
       "@type": "ItemList",
       "name": document.querySelector('title').innerText,
@@ -120,8 +116,8 @@
     const response = await fetch(search_url.toString())
     const data = await response.json()
     renderBlogPosts(data.posts, 0)
-    renderAvatar()
-    renderJSONLD({
+    utils.renderAvatar(config)
+    utils.renderJSONLD({
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": config.web_app_title,
@@ -149,7 +145,7 @@
       title += post.no
       const date = post.record.createdAt
       let tags = post.record.facets.map(item => item.features[0]).filter(item => item.$type === 'app.bsky.richtext.facet#tag').map(item => item.tag)
-      tags = tags.map(renderTagSegment).join('')
+      tags = tags.map(utils.renderTagSegment).join('')
       const rkey = post.uri.split('/').pop()
       const author = post.author.displayName
       const ele = utils.convertStringToTemplate(articleTemplate, {title, date, author, description, tags, rkey})
@@ -176,23 +172,6 @@
     }
   }
 
-  function renderJSONLD(data) {
-    const script = document.createElement('script');
-    script.setAttribute('type', 'application/ld+json');
-    script.textContent = JSON.stringify(data);
-    document.head.appendChild(script);
-  }
-
-  function renderAvatar() {
-    document.querySelector('#actoravatar').style.background = `url(${config.avatar}) no-repeat`
-    document.querySelector('#actoravatar').style.backgroundSize = 'cover'
-    document.querySelector('#actorDisplayName').innerText = config.displayName
-  }
-
-  function renderTagSegment(tag) {
-    return `<a class="meta_original_tag" href="/search?tag=${encodeURIComponent(tag)}">${tag}</a>`
-  }
-
   const articleTemplate = `
 <div class="rich_media_area_primary">
   <h2 class="rich_media_title">
@@ -202,7 +181,7 @@
   <em class="rich_media_meta rich_media_meta_text">
   \${date}
   </em>
-  <em class="rich_media_meta rich_media_meta_link rich_media_meta_nickname" href="/">
+  <em class="rich_media_meta rich_media_meta_link rich_media_meta_nickname">
   \${author}
   </em>
   </div>

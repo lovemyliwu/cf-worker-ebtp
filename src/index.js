@@ -18,6 +18,8 @@ export default {
         switch (url.pathname) {
             case '/config':
                 return await getConfig(env)
+            case '/data':
+                return await getData(env, url)
             case '/searchBlogs':
                 // mock to test
                 const r = await fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
@@ -75,7 +77,7 @@ class TitleRewriter {
 }
 
 function handleBlogHTMLRequest(request, env, url) {
-    if (isTid(url.pathname)) {
+    if (isTid(url.pathname.slice(1))) {
         url.pathname = '/article.html'
         return env.ASSETS.fetch(new Request(url.toString()))
     }
@@ -103,6 +105,24 @@ async function go(env, postAt) {
 	})
 }
 
+async function getData(env, url) {
+    const rkey = url.searchParams.get('rkey')
+    if (!rkey) return json({ error: 'BadParams', message: `bad params`})
+
+    const response = await fetch(`https://${env.PDS_HOST}/xrpc/com.atproto.repo.getRecord?repo=${env.DID}&collection=app.bsky.feed.post&rkey=${rkey}`)
+    const result = await response.json()
+    if (result.error) return json(result)
+
+	const record = result.value
+	const blog_blob = record?.embed?.external?.blog
+	if (!blog_blob) return json({ error: 'NotEBTP', message: 'not found embed blog in the post'})
+
+	const blogResponse = await fetch(`https://${env.PDS_HOST}/xrpc/com.atproto.sync.getBlob?did=${env.DID}&cid=${blog_blob.ref.$link}`)
+    const blog = await blogResponse.text()
+	const meta = record?.embed?.external?.meta
+	return json({record, blog})
+}
+
 async function getConfig(env) {
     const response = await fetch(`https://${env.API_HOST}/xrpc/app.bsky.actor.getProfile?actor=${env.DID}`)
     const data = await response.json()
@@ -110,6 +130,8 @@ async function getConfig(env) {
         ...data,
         'gate_host': env.GATE_HOST,
         'blog_host': env.BLOG_HOST,
+        'api_host': env.API_HOST,
+        'app_host': env.APP_HOST,
         'search_page_size': env.SEARCH_PAGE_SIZE,
         'web_app_title': env.WEB_APP_TITLE
     })
