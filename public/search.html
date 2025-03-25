@@ -35,18 +35,6 @@
   const config = await response.json()
   let url = new URL(location.href)
 
-  switch(url.pathname) {
-    case '/':
-      renderIndexPage(url)
-      break
-    case '/search':
-      search(url)
-      break
-    default:
-      location.href = '/'
-  }
-  await utils.initBackgroundPic();
-
   function search(url) {
     if (url.searchParams.get('q')) {
       renderKeywordSearch(url)
@@ -197,6 +185,18 @@
   </div>
 </div>
   `
+
+  switch(url.pathname) {
+    case '/':
+      renderIndexPage(url)
+      break
+    case '/search':
+      search(url)
+      break
+    default:
+      location.href = '/'
+  }
+  await utils.initBackgroundPic();
   </script>
 </body>
 </html>
