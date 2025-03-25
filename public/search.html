@@ -43,7 +43,7 @@
       search(url)
       break
     default:
-      throw Error(`path ${url.pathname} not support`)
+      location.href = '/'
   }
   await utils.initBackgroundPic();
 
@@ -52,28 +52,37 @@
       renderKeywordSearch(url)
     } else if (url.searchParams.get('tag')) {
       renderTagSearch(url)
+    } else {
+      location.href = '/'
     }
   }
 
+  function getSearchUrl(q) {
+    return new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
+  }
+
+  function renderTitle(title) {
+    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title})
+  }
+
   async function renderTagSearch(url) {
-    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title: `Tag:${url.searchParams.get('tag')}`})
+    renderTitle(`Tag:${url.searchParams.get('tag')}`)
     const q = `#${url.searchParams.get('tag')} from:${config.handle}`
-    let search_url = new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
+    const search_url = getSearchUrl(q)
     await renderSearch(search_url)
   }
 
   async function renderKeywordSearch(url) {
-    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title: `Keyword:${url.searchParams.get('q')}`})
+    renderTitle(`Keyword:${url.searchParams.get('q')}`)
     const q = `${url.searchParams.get('q')} from:${config.handle}`
-    let search_url = new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
+    const search_url = getSearchUrl(q)
     await renderSearch(search_url)
   }
 
   async function renderSearch(search_url, ) {
     const response = await fetch(search_url.toString())
     const data = await response.json()
-    let cursor = url.searchParams.get('cursor') ?? 0
-    renderBlogPosts(data.posts, cursor)
+    renderBlogPosts(data.posts, 0)
     renderAvatar()
     renderJSONLD({
       "@context": "https://schema.org",
@@ -106,11 +115,11 @@
   }
 
   async function renderIndexPage(url) {
-    let search_url = new URL(`https://${url.host}/searchBlogs?q=from%3A${config.handle}&limit=100&sort=latest&domain=${config.gate_host}`)
+    const q = `from:${config.handle}`
+    const search_url = getSearchUrl(q)
     const response = await fetch(search_url.toString())
     const data = await response.json()
-    let cursor = url.searchParams.get('cursor') ?? 0
-    renderBlogPosts(data.posts, cursor)
+    renderBlogPosts(data.posts, 0)
     renderAvatar()
     renderJSONLD({
       "@context": "https://schema.org",
