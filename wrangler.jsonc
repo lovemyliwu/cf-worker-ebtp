@@ -13,13 +13,10 @@
     "observability": {
       "enabled": true
     },
-    "routes": [
-      {"pattern": "ebtp.smitechow.com/*", "zone_name": "smitechow.com"},
-      {"pattern": "blog.smitechow.com/*", "zone_name": "smitechow.com"}
-    ],
     "vars": {
-        // "GATE_HOST": "ebtp.smitechow.com",
-        "GATE_HOST": "ebtp.hukoubook.com",
+        "GATE_HOST": "127.0.0.1:8787",
+        "SEARCH_DOMAIN": "ebtp.hukoubook.com",
+        "BLOG_ORIGIN": "http://localhost:8787",
         "API_HOST": "api.hukoubook.com",
         "PDS_HOST": "network.hukoubook.com",
         "DID": "did:web:smite.hukoubook.com",
@@ -29,5 +26,27 @@
         "WEB_PAGE_TITLE": "${title} - 再见理想",
         "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
         "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
+    },
+    "env": {
+      "production": {
+        "routes": [
+          {"pattern": "ebtp.smitechow.com/*", "zone_name": "smitechow.com"},
+          {"pattern": "blog.smitechow.com/*", "zone_name": "smitechow.com"}
+        ],
+        "vars": {
+          "GATE_HOST": "ebtp.smitechow.com",
+          "SEARCH_DOMAIN": "ebtp.hukoubook.com",
+          "BLOG_ORIGIN": "https://blog.smitechow.com",
+          "API_HOST": "api.hukoubook.com",
+          "PDS_HOST": "network.hukoubook.com",
+          "DID": "did:web:smite.hukoubook.com",
+          "APP_HOST": "app.hukoubook.com",
+          "SEARCH_PAGE_SIZE": 10,
+          "WEB_APP_TITLE": "再见理想",
+          "WEB_PAGE_TITLE": "${title} - 再见理想",
+          "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
+          "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
+        }
+      }
     }
   }

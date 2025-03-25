@@ -11,7 +11,7 @@ export async function handleRequest(request, env, ctx) {
 }
 
 function go(env, postAt) {
-	let [,, rkey] = postAt.slice('at://'.length).split('/')
-	let uri = `https://${env.BLOG_HOST}/${rkey}`
+	const [,, rkey] = postAt.slice('at://'.length).split('/')
+	const uri = `${env.BLOG_ORIGIN}/${rkey}`
 	return textHtml(`<html><head><meta http-equiv="refresh" content="0; URL='${uri}'" /><style>:root { color-scheme: light dark; }</style></head></html>`)
 }

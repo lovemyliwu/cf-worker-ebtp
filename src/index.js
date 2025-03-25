@@ -49,7 +49,7 @@ async function getConfig(env) {
   const data = await response.json()
   return json({
     ...data,
-    'gate_host': env.GATE_HOST,
+    'gate_host': env.SEARCH_DOMAIN,
     'app_host': env.APP_HOST,
     'search_page_size': env.SEARCH_PAGE_SIZE,
     'web_app_title': env.WEB_APP_TITLE
