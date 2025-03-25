@@ -1,18 +1,13 @@
 <!DOCTYPE html>
-<html class='v2' dir='ltr' itemscope='' itemtype='http://schema.org/Blog' lang='zh-cn' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<html lang='zh-CN'>
 <head>
-<meta charset='utf-8'/>
-<meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-<link href='/static/favicon.ico' rel='icon' type='image/x-icon'/>
-<meta content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui' name='viewport'/>
-<title>blog search page</title>
-<meta content='yes' name='mobile-web-app-capable'/>
-<meta content='yes' name='apple-mobile-web-app-capable'/>
-<link href='/' rel='home'/>
-<link href='/' rel='msapplication-starturl'/>
-<link href='/static/img/avator.jpg' rel='icon'/>
-<link href='/static/img/avator.jpg' rel='apple-touch-icon-precomposed'/>
-<link href='/static/css/blog.css' rel='stylesheet'/>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='/static/img/avatar.jpg' rel='shortcut icon'>
+  <title>blog search page</title>
+  <link href='/static/css/blog.css' rel='stylesheet'>
+  <meta name="generator" content="ebtp">
 </head>
 <body class='rich_media rich_media_inner'>
   <div class='page-content footer-push section' id='container'>
@@ -26,7 +21,7 @@
   <div class='qr_code_pc_outer'>
     <div class='qr_code_pc_inner'>
       <div class='qr_code_pc'>
-      <div id="actorAvator" class='qr_code_pc_img'></div>
+      <div id="actoravatar" class='qr_code_pc_img'></div>
       <p id="actorDisplayName"></p>
       </div>
     </div>
@@ -61,8 +56,9 @@
   }
 
   async function renderIndexPage(url) {
-    document.querySelector('title').innerText = config.web_app_title
-    const response = await fetch(`/searchBlogs?q=from%3A${config.handle}&limit=${config.search_page_size}&sort=latest&domain=${config.gate_host}`)
+    let search_url = new URL(`https://${url.host}/searchBlogs?q=from%3A${config.handle}&limit=${config.search_page_size}&sort=latest&domain=${config.gate_host}`)
+    if (url.searchParams.get('cursor')) search_url.searchParams.set('cursor', )
+    const response = await fetch(search_url.toString())
     const data = await response.json()
     let articleList = []
     for (let post of data.posts) {
@@ -85,8 +81,31 @@
       document.querySelector('#nexCursor').style.display = 'none'
     }
 
-    document.querySelector('#actorAvator').style.background = `url(${config.avatar}) no-repeat`
-    document.querySelector('#actorAvator').style.backgroundSize = 'cover'
+    renderAvatar()
+    renderJSONLD()
+  }
+
+  function renderJSONLD() {
+    const data = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": config.web_app_title,
+      "url": `https://${config.blog_host}`,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `https://${config.blog_host}/search?q={search_term}`,
+        "query-input": "required name=search_term"
+      }
+    }
+    const script = document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
+  function renderAvatar() {
+    document.querySelector('#actoravatar').style.background = `url(${config.avatar}) no-repeat`
+    document.querySelector('#actoravatar').style.backgroundSize = 'cover'
     document.querySelector('#actorDisplayName').innerText = config.displayName
   }
 

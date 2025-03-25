@@ -232,7 +232,7 @@ footer {
 }
 
 .rich_media .qr_code_pc_img {
-    background: url(/static/img/avator.jpg) no-repeat;
+    background: url(/static/img/avatar.jpg) no-repeat;
     background-size: cover;
     clip-path: circle(50%);
 }

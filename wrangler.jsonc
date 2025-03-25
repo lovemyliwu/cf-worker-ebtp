@@ -25,7 +25,8 @@
         "DID": "did:web:smite.hukoubook.com",
         "SEARCH_PAGE_SIZE": 10,
         "WEB_APP_TITLE": "再见理想",
-        "WEB_PAGE_CONTENT_LANGUAGE": "zh-cn",
+        "WEB_PAGE_TITLE": "${title} - 再见理想",
+        "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
         "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
     }
   }

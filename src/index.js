@@ -22,7 +22,7 @@ export default {
                 return fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
         }
         const res = await handleBlogHTMLRequest(request, env, url)
-        const rewriter = new HTMLRewriter().on('head', new HeadRewriter(request, env)).on('footer', new FooterRewriter(request, env))
+        const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(request, env))
         return rewriter.transform(res)
     }
 };
@@ -50,6 +50,31 @@ class FooterRewriter {
 
     element(element) {
         element.setInnerContent(this.env.WEB_PAGE_FOOTER)
+    }
+}
+
+class HTMLTagRewriter {
+    constructor(env) {
+        this.env = env
+    }
+
+    element(element) {
+        element.setAttribute('lang', this.env.WEB_PAGE_CONTENT_LANGUAGE)
+    }
+}
+
+class TitleRewriter {
+    constructor(env, url) {
+        this.env = env
+        this.url = new URL(url)
+    }
+
+    element(element) {
+        if (this.url.pathname === '/') {
+            element.setInnerContent(this.env.WEB_APP_TITLE)
+        } else {
+            element.setInnerContent(this.env.WEB_PAGE_TITLE)
+        }
     }
 }
 
@@ -88,6 +113,7 @@ async function getConfig(env) {
     return json({
         ...data,
         'gate_host': env.GATE_HOST,
+        'blog_host': env.BLOG_HOST,
         'search_page_size': env.SEARCH_PAGE_SIZE,
         'web_app_title': env.WEB_APP_TITLE
     })
