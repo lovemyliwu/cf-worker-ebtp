@@ -70,8 +70,12 @@ class TitleRewriter {
     element(element) {
         if (this.url.pathname === '/') {
             element.setInnerContent(this.env.WEB_APP_TITLE)
-        } else {
+        } else if (isTid(this.url.pathname.slice(1)) || this.url.pathname === '/search') {
             element.setInnerContent(this.env.WEB_PAGE_TITLE)
+        } else if (this.url.pathname === '/about') {
+            element.setInnerContent(`关于 - ${this.env.WEB_APP_TITLE}`)
+        } else if (this.url.pathname === '/404') {
+            element.setInnerContent(`页面未找到 - ${this.env.WEB_APP_TITLE}`)
         }
     }
 }
