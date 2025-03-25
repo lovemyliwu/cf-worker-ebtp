@@ -13,10 +13,10 @@
     "observability": {
       "enabled": true
     },
-    // "routes": [
-    //   {"pattern": "ebtp.smitechow.com/*", "zone_name": "smitechow.com"},
-    //   {"pattern": "blog.smitechow.com/*", "zone_name": "smitechow.com"}
-    // ],
+    "routes": [
+      {"pattern": "ebtp.smitechow.com/*", "zone_name": "smitechow.com"},
+      {"pattern": "blog.smitechow.com/*", "zone_name": "smitechow.com"}
+    ],
     "vars": {
         // "GATE_HOST": "ebtp.smitechow.com",
         "GATE_HOST": "ebtp.hukoubook.com",

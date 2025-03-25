@@ -4,9 +4,6 @@ const response = await fetch('/config')
 const config = await response.json()
 let url = new URL(location.href)
 
-renderArticle(url)
-await utils.initBackgroundPic();
-
 const template = `
 <div class="rich_media_area_primary">
 <h2 class="rich_media_title">
@@ -28,6 +25,43 @@ const template = `
 \${tags}
 </div>
 </div>`
+
+function generateTLDR([root, related, pre], item) {
+   let preTag = pre?.tagName;
+   let tag = item.tagName;
+   let container;
+   if (pre === null) {
+       container = root;
+   } else if (preTag !== tag) {
+       if (preTag < tag) {
+           let subContainer = document.createElement('ol');
+           related.append(subContainer);
+           container = subContainer;
+       } else {
+           container = related.parentElement.parentElement.parentElement;
+       }
+   } else {
+       container = related.parentElement;
+   }
+   let listItem = document.createElement('li');
+   listItem.innerHTML = `<a href="#${item.id}">${item.innerText}</a>`;
+   container.append(listItem);
+   return [root, listItem, item];
+}
+
+function initTLDR() {
+   let markdownBody = document.querySelector('.markdown-body');
+   let [content, _, __] = [...markdownBody.children].filter(item => /H[1-6]{1}/.test(item.tagName)).reduce(generateTLDR, [document.createElement('ol'), null, null]);
+   if (content.childElementCount) {
+       let tldr = document.createElement('div');
+       let label = document.createElement('h2');
+       label.innerText = 'TL;DR';
+       tldr.append(label);
+       tldr.append(content);
+       document.querySelector('.rich_media_area_primary').insertBefore(tldr, markdownBody)
+   }
+}
+
 async function renderArticle(url) {
     const rkey = url.pathname.slice(1)
     const response = await fetch(`/data?rkey=${rkey}`)
@@ -68,38 +102,5 @@ async function renderArticle(url) {
     initTLDR();
 }
 
-function generateTLDR([root, related, pre], item) {
-    let preTag = pre?.tagName;
-    let tag = item.tagName;
-    let container;
-    if (pre === null) {
-        container = root;
-    } else if (preTag !== tag) {
-        if (preTag < tag) {
-            let subContainer = document.createElement('ol');
-            related.append(subContainer);
-            container = subContainer;
-        } else {
-            container = related.parentElement.parentElement.parentElement;
-        }
-    } else {
-        container = related.parentElement;
-    }
-    let listItem = document.createElement('li');
-    listItem.innerHTML = `<a href="#${item.id}">${item.innerText}</a>`;
-    container.append(listItem);
-    return [root, listItem, item];
-}
-
-function initTLDR() {
-    let markdownBody = document.querySelector('.markdown-body');
-    let [content, _, __] = [...markdownBody.children].filter(item => /H[1-6]{1}/.test(item.tagName)).reduce(generateTLDR, [document.createElement('ol'), null, null]);
-    if (content.childElementCount) {
-        let tldr = document.createElement('div');
-        let label = document.createElement('h2');
-        label.innerText = 'TL;DR';
-        tldr.append(label);
-        tldr.append(content);
-        document.querySelector('.rich_media_area_primary').insertBefore(tldr, markdownBody)
-    }
-}
+renderArticle(url)
+await utils.initBackgroundPic();
