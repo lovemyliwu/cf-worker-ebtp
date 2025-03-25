@@ -19,32 +19,25 @@ export default {
             case '/config':
                 return await getConfig(env)
             case '/searchBlogs':
-                return fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
+                // mock to test
+                const r = await fetch(new Request(`https://${env.API_HOST}/xrpc/app.bsky.feed.searchPosts${url.search}`))
+                const d = await r.json()
+                console.log(d)
+                let posts = []
+                let post = d.posts[0]
+                for (let idx = 0; idx < 32 ; idx ++) {
+                    posts.push({...post, no: idx})
+                }
+                return json({posts})
         }
         const res = await handleBlogHTMLRequest(request, env, url)
-        const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(request, env))
+        const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(env))
         return rewriter.transform(res)
     }
 };
 
-class HeadRewriter {
-  constructor(request, env) {
-    this.request = request
-    this.env = env
-  }
- 
-  element(element) {
-    element.append(`
-<meta content='${this.env.WEB_APP_TITLE}' name='application-name'/>
-<meta content='${this.env.WEB_APP_TITLE}' name='apple-mobile-web-app-title'/>
-<meta content='${this.env.WEB_PAGE_CONTENT_LANGUAGE}' http-equiv='Content-Language'/>
-    `, { html: true })
-  }
-}
-
 class FooterRewriter {
-    constructor(request, env) {
-        this.request = request
+    constructor(env) {
         this.env = env
     }
 

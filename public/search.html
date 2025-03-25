@@ -11,9 +11,11 @@
 </head>
 <body class='rich_media rich_media_inner'>
   <div class='page-content footer-push section' id='container'>
+    <div id="postsContainer"></div>
     <div class='rich_media_tool navigator'>
       <div class='media_tool_meta tips_global meta_primary'>导航&#65306;</div>
-      <a id="nexCursor" href="#">&#8592;较旧的博文</a>
+      <a id="nextCursor" href="#">&#8592;较旧的博文</a>
+      <a id="preCursor" href="#">较新的博文→</a>
       <a class='tips_global meta_extra' href='#'>&#8593;回到页顶</a>
     </div>
     <div class='footer-pad'></div>
@@ -56,14 +58,22 @@
   }
 
   async function renderIndexPage(url) {
-    let search_url = new URL(`https://${url.host}/searchBlogs?q=from%3A${config.handle}&limit=${config.search_page_size}&sort=latest&domain=${config.gate_host}`)
-    if (url.searchParams.get('cursor')) search_url.searchParams.set('cursor', )
+    let search_url = new URL(`https://${url.host}/searchBlogs?q=from%3A${config.handle}&limit=100&sort=latest&domain=${config.gate_host}`)
     const response = await fetch(search_url.toString())
     const data = await response.json()
+    let cursor = url.searchParams.get('cursor') ?? 0
+    renderBlogPosts(data.posts, cursor)
+    renderAvatar()
+    renderJSONLD()
+  }
+
+  function renderBlogPosts(allPosts, cursor) {
+    const posts = allPosts.slice(cursor, cursor + config.search_page_size)
     let articleList = []
-    for (let post of data.posts) {
+    for (let post of posts) {
       const external = post.record.embed.external
-      const {title, description} = external
+      let {title, description} = external
+      title += post.no
       const date = post.record.createdAt
       let tags = post.record.facets.map(item => item.features[0]).filter(item => item.$type === 'app.bsky.richtext.facet#tag').map(item => item.tag)
       tags = tags.map(renderTagSegment).join('')
@@ -72,17 +82,25 @@
       const ele = utils.convertStringToTemplate(articleTemplate, {title, date, author, description, tags, rkey})
       articleList.push(ele)
     }
-    document.querySelector('#container').insertAdjacentHTML("afterbegin", articleList.join(''))
+    document.querySelector('#postsContainer').innerHTML = articleList.join('')
 
-    if (data.cursor) {
-      url.searchParams.set('cursor', data.cursor)
-      document.querySelector('#nexCursor').setAttribute('href', url.toString())
+    if ((allPosts.length - 1) > (cursor + config.search_page_size)) {
+      document.querySelector('#nextCursor').onclick = event => {
+        renderBlogPosts(allPosts, cursor + config.search_page_size);
+      }
+      document.querySelector('#nextCursor').style.display = 'inline'
     } else {
-      document.querySelector('#nexCursor').style.display = 'none'
+      document.querySelector('#nextCursor').style.display = 'none'
     }
 
-    renderAvatar()
-    renderJSONLD()
+    if (cursor > 0) {
+      document.querySelector('#preCursor').onclick = event => {
+        renderBlogPosts(allPosts, Math.max(cursor - config.search_page_size, 0));
+      }
+      document.querySelector('#preCursor').style.display = 'inline'
+    } else {
+      document.querySelector('#preCursor').style.display = 'none'
+    }
   }
 
   function renderJSONLD() {
