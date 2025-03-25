@@ -11,12 +11,12 @@
 </head>
 <body class='rich_media rich_media_inner'>
   <div class='page-content footer-push section' id='container'>
-    <div id="postsContainer"></div>
+    <div id="postsContainer">loading...</div>
     <div class='rich_media_tool navigator'>
-      <div class='media_tool_meta tips_global meta_primary'>导航&#65306;</div>
-      <a id="nextCursor" href="#">&#8592;较旧的博文</a>
+      <div class='media_tool_meta tips_global meta_primary'>导航：</div>
+      <a id="nextCursor" href="#">←较旧的博文</a>
       <a id="preCursor" href="#">较新的博文→</a>
-      <a class='tips_global meta_extra' href='#'>&#8593;回到页顶</a>
+      <a class='tips_global meta_extra' href='#'>↑回到页顶</a>
     </div>
     <div class='footer-pad'></div>
   </div>
@@ -24,7 +24,7 @@
     <div class='qr_code_pc_inner'>
       <div class='qr_code_pc'>
       <div id="actoravatar" class='qr_code_pc_img'></div>
-      <p id="actorDisplayName"></p>
+      <a id="actorDisplayName" href="/about"></a>
       </div>
     </div>
   </div>
@@ -49,12 +49,60 @@
 
   function search(url) {
     if (url.searchParams.get('q')) {
-      console.log('keyword search')
+      renderKeywordSearch(url)
     } else if (url.searchParams.get('tag')) {
-      console.log('tag search')
-    } else if (url.searchParams.get('since') && url.searchParams.get('until')) {
-      console.log('archive search')
+      renderTagSearch(url)
     }
+  }
+
+  async function renderTagSearch(url) {
+    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title: `Tag:${url.searchParams.get('tag')}`})
+    const q = `#${url.searchParams.get('tag')} from:${config.handle}`
+    let search_url = new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
+    await renderSearch(search_url)
+  }
+
+  async function renderKeywordSearch(url) {
+    document.querySelector('title').innerText = utils.convertStringToTemplate(document.querySelector('title').innerText, {title: `Keyword:${url.searchParams.get('q')}`})
+    const q = `${url.searchParams.get('q')} from:${config.handle}`
+    let search_url = new URL(`https://${url.host}/searchBlogs?q=${encodeURIComponent(q)}&limit=100&sort=latest&domain=${config.gate_host}`)
+    await renderSearch(search_url)
+  }
+
+  async function renderSearch(search_url, ) {
+    const response = await fetch(search_url.toString())
+    const data = await response.json()
+    let cursor = url.searchParams.get('cursor') ?? 0
+    renderBlogPosts(data.posts, cursor)
+    renderAvatar()
+    renderJSONLD({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": document.querySelector('title').innerText,
+      "description": "符合搜索条件的文章列表",
+      "itemListElement": data.posts.map(post => {
+        const rkey = post.uri.split('/').pop()
+        const external = post.record.embed.external
+        const {title, description} = external
+        const date = post.record.createdAt
+        const author = post.author.displayName
+        return {
+          "@type": "ListItem",
+          "item": {
+            "@type": "Article",
+            "mainEntityOfPage": `https://${config.blog_host}/${rkey}`,
+            "headline": title,
+            "datePublished": date,
+            "dateModified": date,
+            "author": [{
+                "@type": "Person",
+                "name": author,
+                "url": `https://${config.blog_host}/about`
+            }]
+          }
+        }
+      })
+    })
   }
 
   async function renderIndexPage(url) {
@@ -64,10 +112,26 @@
     let cursor = url.searchParams.get('cursor') ?? 0
     renderBlogPosts(data.posts, cursor)
     renderAvatar()
-    renderJSONLD()
+    renderJSONLD({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": config.web_app_title,
+      "url": `https://${config.blog_host}`,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `https://${config.blog_host}/search?q={search_term}`,
+        "query-input": "required name=search_term"
+      }
+    })
   }
 
   function renderBlogPosts(allPosts, cursor) {
+    if (!allPosts.length) {
+      document.querySelector('#postsContainer').innerHTML = '<div class="rich_media_area_primary">没有找到任何文章，<a href="/">回到主页</a></div>'
+      document.querySelector('.navigator').style.display = 'none'
+      return
+    }
+
     const posts = allPosts.slice(cursor, cursor + config.search_page_size)
     let articleList = []
     for (let post of posts) {
@@ -103,18 +167,7 @@
     }
   }
 
-  function renderJSONLD() {
-    const data = {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": config.web_app_title,
-      "url": `https://${config.blog_host}`,
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": `https://${config.blog_host}/search?q={search_term}`,
-        "query-input": "required name=search_term"
-      }
-    }
+  function renderJSONLD(data) {
     const script = document.createElement('script');
     script.setAttribute('type', 'application/ld+json');
     script.textContent = JSON.stringify(data);

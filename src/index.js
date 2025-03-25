@@ -24,6 +24,9 @@ export default {
                 const d = await r.json()
                 console.log(d)
                 let posts = []
+
+                if (!d.posts.length) return json({posts})
+
                 let post = d.posts[0]
                 for (let idx = 0; idx < 32 ; idx ++) {
                     posts.push({...post, no: idx})
