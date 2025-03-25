@@ -1,19 +1,8 @@
 import { json } from "./utils.js"
 
-export async function handleRequest(request, env, ctx) {
-  // mock to test
-  const url = new URL(request.url)
-  url.host = env.API_HOST
-  url.protocol = 'https:'
-  url.port = ''
-  console.log(`request bsky api: ${url.toString()}`)
-
-  if (url.pathname !== '/xrpc/app.bsky.feed.searchPosts') {
-    return fetch(new Request(url.toString()))
-  }
+async function fakeSearch(url) {
   const r = await fetch(new Request(url.toString()))
   const d = await r.json()
-  console.log(d)
   let posts = []
 
   if (!d.posts.length) return json({posts})
@@ -23,4 +12,19 @@ export async function handleRequest(request, env, ctx) {
     posts.push({...post, no: idx})
   }
   return json({posts})
+}
+
+export async function handleRequest(request, env, ctx) {
+  const url = new URL(request.url)
+  const needFake = url.host.startsWith('localhost') && url.pathname === '/xrpc/app.bsky.feed.searchPosts'
+
+  url.host = env.API_HOST
+  url.protocol = 'https:'
+  url.port = ''
+
+  if (needFake) {
+    return await fakeSearch(url)
+  }
+
+  return fetch(new Request(url.toString()))
 }

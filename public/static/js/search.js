@@ -104,7 +104,6 @@ function renderBlogPosts(allPosts, cursor) {
             title,
             description
         } = external
-        title += post.no
         const date = post.record.createdAt
         let tags = post.record.facets.map(item => item.features[0]).filter(item => item.$type === 'app.bsky.richtext.facet#tag').map(item => item.tag)
         tags = tags.map(utils.renderTagSegment).join('')
