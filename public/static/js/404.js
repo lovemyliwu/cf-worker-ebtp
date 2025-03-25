@@ -4,13 +4,9 @@ const config = await response.json()
 utils.renderAvatar(config)
 utils.renderJSONLD({
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": config.displayName,
-  "jobTitle": "Blogger",
-  "description": config.description,
-  "sameAs": [
-    `${location.origin}/about`,
-    `https://${config.app_host}/profile/${config.handle}`
-  ]
+  "@type": "WebPage",
+  "name": document.querySelector('title').innerText,
+  "description": "你所访问的页面不存在",
+  "url": location.href
 })
 await utils.initBackgroundPic()

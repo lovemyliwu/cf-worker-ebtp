@@ -68,6 +68,12 @@ Bluesky账号：@smitechow.com
 }
 
 function notFoundPage(html) {
-  const main = `<div id="postsContainer">你所访问的页面不存在，请返回<a href="/">主页</a></div>`
-  return textHtml(convertStringToTemplate(html, { main, moduleJs: '' }))
+  const main = `
+<div id="postsContainer">
+<div class="rich_media_area_primary">
+你所访问的页面不存在，请返回<a href="/">主页</a>
+</div>
+</div>`
+  const moduleJs = `<script type="module" src="/static/js/404.js"></script>`
+  return textHtml(convertStringToTemplate(html, { main, moduleJs }))
 }
