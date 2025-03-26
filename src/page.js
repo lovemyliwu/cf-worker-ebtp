@@ -38,8 +38,8 @@ function searchPage(html) {
 <div id="postsContainer">loading...</div>
 <div class='rich_media_tool navigator'>
 <div class='media_tool_meta tips_global meta_primary'>导航：</div>
-<a id="nextCursor" href="#">←较旧的博文</a>
-<a id="preCursor" href="#">较新的博文→</a>
+<a id="nextCursor" href="#">←较旧博文</a>
+<a id="preCursor" href="#">较新博文→</a>
 <a class='tips_global meta_extra' href='#'>↑回到页顶</a>
 </div>`
   const moduleJs = `<script type="module" src="/static/js/search.js"></script>`

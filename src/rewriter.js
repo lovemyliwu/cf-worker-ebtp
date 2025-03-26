@@ -20,6 +20,16 @@ export class HTMLTagRewriter {
   }
 }
 
+export class AppTitleRewriter {
+  constructor(env) {
+    this.env = env
+  }
+
+  element(element) {
+    element.setInnerContent(this.env.WEB_APP_TITLE)
+  }
+}
+
 export class TitleRewriter {
   constructor(env, url) {
     this.env = env

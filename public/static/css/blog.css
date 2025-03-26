@@ -1,3 +1,19 @@
+.app-title {
+    position: relative;
+    font-size: 1.23pc;
+    cursor: pointer;
+}
+
+.search-article {
+    position: relative;
+    width: 102px;
+    margin: 1pc 0pc;
+}
+
+.search-article input {
+    width: 102px;
+}
+
 pre.prettyprint {
     resize: both;
 }

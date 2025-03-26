@@ -1,7 +1,7 @@
 import { handleRequest as gateService } from './gate.js'
 import { handleRequest as bskyApiService } from './bsky.js'
 import { json } from './utils.js'
-import { HTMLTagRewriter, TitleRewriter, FooterRewriter } from './rewriter.js'
+import { HTMLTagRewriter, TitleRewriter, FooterRewriter, AppTitleRewriter } from './rewriter.js'
 import { handleRequest as pageService } from './page.js'
 
 export default {
@@ -21,7 +21,7 @@ export default {
         return await getData(env, url)
     }
     const res = await pageService(request, env, ctx)
-    const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(env))
+    const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(env)).on('.app-title', new AppTitleRewriter(env))
     return rewriter.transform(res)
   }
 };
