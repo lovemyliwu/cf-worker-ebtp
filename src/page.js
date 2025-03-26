@@ -25,7 +25,6 @@ function articlePage(html) {
 <div class='rich_media_tool navigator'>
 <div class='media_tool_meta tips_global meta_primary'>导航：</div>
 <a id="goHome" href="/">←返回主页</a>
-<a id="goComment" href="#">加入讨论→</a>
 <a class='tips_global meta_extra' href='#'>↑回到页顶</a>
 </div>
 <div id="comments"></div>`

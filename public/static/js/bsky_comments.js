@@ -163,7 +163,53 @@ export class BlueskyComments extends HTMLElement {
         height: var(--bluesky-icon-size);
         color: var(--bluesky-footer-text-color);
       }
+      
+      .text-sm {
+          font-size: .875rem;
+          line-height: 1.25rem;
+      }
+      .pt-2\.5 {
+          padding-top: .625rem;
+      }
+      .border-t {
+          border-top-width: 1px;
+      }
+      .gap-5 {
+          gap: 1.25rem;
+      }
+      .items-center {
+          align-items: center;
+      }
+      .cursor-pointer {
+          cursor: pointer;
+      }
+      .flex {
+          display: flex;
+      }
+      .flex-1 {
+          flex: 1 1 0%;
+      }
+      .w-5 {
+          width: 1.25rem;
+      }
+      .h-5 {
+          height: 1.25rem;
+      }
+      .status-bar {
+        padding: 0 var(--bluesky-spacing-lg);
+      }
     </style>
+    <div class="status-bar border-t dark:border-slate-600 w-full pt-2.5 flex items-center gap-5 text-sm ">
+    <div class=" flex gap-2 items-center">
+    <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%2024%2024'%3e%3cpath%20fill='%23ec4899'%20d='M12.489%2021.372c8.528-4.78%2010.626-10.47%209.022-14.47-.779-1.941-2.414-3.333-4.342-3.763-1.697-.378-3.552.003-5.169%201.287-1.617-1.284-3.472-1.665-5.17-1.287-1.927.43-3.562%201.822-4.34%203.764-1.605%204%20.493%209.69%209.021%2014.47a1%201%200%200%200%20.978%200Z'/%3e%3c/svg%3e" class="w-5 h-5">
+    <p class="like font-bold text-neutral-500 dark:text-neutral-300 mb-px" style="">0</p></div>
+    <div class="flex items-center gap-2 ">
+    <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%2024%2024'%3e%3cpath%20fill='%2320bc07'%20d='M17.957%202.293a1%201%200%201%200-1.414%201.414L17.836%205H6a3%203%200%200%200-3%203v3a1%201%200%201%200%202%200V8a1%201%200%200%201%201-1h11.836l-1.293%201.293a1%201%200%200%200%201.414%201.414l2.47-2.47a1.75%201.75%200%200%200%200-2.474l-2.47-2.47ZM20%2012a1%201%200%200%201%201%201v3a3%203%200%200%201-3%203H6.164l1.293%201.293a1%201%200%201%201-1.414%201.414l-2.47-2.47a1.75%201.75%200%200%201%200-2.474l2.47-2.47a1%201%200%200%201%201.414%201.414L6.164%2017H18a1%201%200%200%200%201-1v-3a1%201%200%200%201%201-1Z'/%3e%3c/svg%3e" class="w-5 h-5">
+    <p class="quote font-bold text-neutral-500 dark:text-neutral-300 mb-px">0</p></div>
+    <div class="flex items-center gap-2 "><img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%2024%2024'%3e%3cpath%20fill='rgb(10,122,255)'%20d='M19.002%203a3%203%200%200%201%203%203v10a3%203%200%200%201-3%203H12.28l-4.762%202.858A1%201%200%200%201%206.002%2021v-2h-1a3%203%200%200%201-3-3V6a3%203%200%200%201%203-3h14Z'/%3e%3c/svg%3e" class="w-5 h-5">
+    <p class="reply font-bold text-neutral-500 dark:text-neutral-300 mb-px">0</p></div>
+    <div class="flex-1"></div>
+    <a class="join-reply cursor-pointer text-brand dark:text-brandLighten font-bold hover:underline hidden min-[450px]:inline" href="#">加入讨论→</a></div>
     <div class="comments"></div>
       `;
       this.#observer = new IntersectionObserver(
@@ -300,6 +346,12 @@ export class BlueskyComments extends HTMLElement {
       let instance = this.getAttribute("app_host") ?? 'bsky.app'
       const commentsContainer =
         container || this.shadowRoot.querySelector(".comments");
+      
+      this.shadowRoot.querySelector('.status-bar .like').innerText = thread.post.likeCount
+      this.shadowRoot.querySelector('.status-bar .quote').innerText = thread.post.quoteCount + thread.post.repostCount
+      this.shadowRoot.querySelector('.status-bar .reply').innerText = thread.post.replyCount
+      this.shadowRoot.querySelector('.status-bar .join-reply').setAttribute('href', `https://${instance}/profile/${this.did}/post/${this.rkey}`)
+
       if (thread && thread.replies && thread.replies.length > 0) {
         const sortedReplies = thread.replies.sort((a, b) => {
           return (
@@ -312,7 +364,7 @@ export class BlueskyComments extends HTMLElement {
         });
       } else {
         this.shadowRoot.querySelector(".comments").innerHTML =
-          `<p>Be the first to <a href="https://${instance}/profile/${this.did}/post/${this.rkey}">comment</a>.</p>`;
+          `<p>成为第一个评论的用户，抢<a href="https://${instance}/profile/${this.did}/post/${this.rkey}">沙发🛋</a></p>`;
       }
     }
 

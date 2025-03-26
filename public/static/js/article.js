@@ -78,7 +78,6 @@ async function renderArticle(url) {
         tags: tags.map(utils.renderTagSegment).join(''),
         content: data.blog
     })
-    document.querySelector('#goComment').setAttribute('href', `https://${config.app_host}/profile/${config.handle}/post/${rkey}`)
     const postAt = `at://${config.did}/app.bsky.feed.post/${rkey}`
     let ele = document.createElement('bluesky-comments')
     ele.setAttribute('url', postAt)
