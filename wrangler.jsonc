@@ -15,7 +15,7 @@
     },
     "vars": {
         "GATE_HOST": "127.0.0.1:8787",
-        "SEARCH_DOMAIN": "ebtp.hukoubook.com",
+        "SEARCH_DOMAIN": "ebtp.smitechow.com",
         "BLOG_ORIGIN": "http://localhost:8787",
         "API_HOST": "api.hukoubook.com",
         "CDN_HOST": "cdn.bsky.app",
@@ -38,7 +38,7 @@
         ],
         "vars": {
           "GATE_HOST": "ebtp.smitechow.com",
-          "SEARCH_DOMAIN": "ebtp.hukoubook.com",
+          "SEARCH_DOMAIN": "ebtp.smitechow.com",
           "BLOG_ORIGIN": "https://blog.smitechow.com",
           "API_HOST": "api.hukoubook.com",
           "CDN_HOST": "cdn.bsky.app",
