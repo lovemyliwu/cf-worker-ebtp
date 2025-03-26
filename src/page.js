@@ -75,5 +75,5 @@ function notFoundPage(html) {
 </div>
 </div>`
   const moduleJs = `<script type="module" src="/static/js/404.js"></script>`
-  return textHtml(convertStringToTemplate(html, { main, moduleJs }))
+  return textHtml(convertStringToTemplate(html, { main, moduleJs }), 404)
 }

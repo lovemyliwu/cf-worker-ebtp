@@ -2,8 +2,8 @@ export function json(data) {
   return new Response(JSON.stringify(data), {headers: {'content-type': 'application/json'}})
 }
 
-export function textHtml(data) {
-  return new Response(data, {headers: {'content-type': 'text/html'}})
+export function textHtml(data, status=200) {
+  return new Response(data, {status, headers: {'content-type': 'text/html'}})
 }
 
 export function isTid(str) {
