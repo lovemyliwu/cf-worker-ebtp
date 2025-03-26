@@ -66,7 +66,8 @@ async function renderArticle(url) {
     const rkey = url.pathname.slice(1)
     const response = await fetch(`/data?rkey=${rkey}`)
     const data = await response.json()
-    const meta = data.record.embed.external.meta
+    const external = data.record.embed.external
+    const meta = external.meta
 
     if (data.error) throw Error(data.message)
 
@@ -86,17 +87,20 @@ async function renderArticle(url) {
     document.querySelector('#comments').appendChild(ele)
 
     utils.renderAvatar(config)
+    let image = `${location.origin}/static/img/avatar.jpg`
+    if (external?.thumb?.ref?.$link) image = `${location.origin}/img/feed_thumbnail/plain/${config.did}/${external.thumb.ref.$link}`
     utils.renderJSONLD({
         "@context": "https://schema.org",
         "@type": "NewsArticle",
         "headline": meta.title,
+        "image": image,
         "datePublished": meta.date,
         "dateModified": meta.date,
         "description": meta.excerpt,
         "author": [{
             "@type": "Person",
             "name": meta.author,
-            "url": `https://${config.blog_host}/about`
+            "url": `${location.origin}/about`
         }]
     })
     initTLDR();
