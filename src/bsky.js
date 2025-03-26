@@ -18,7 +18,10 @@ export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url)
   const needFake = url.host.startsWith('localhost') && url.pathname === '/xrpc/app.bsky.feed.searchPosts'
 
-  url.host = env.API_HOST
+  if (url.pathname.startsWith('/xrpc/'))
+    url.host = env.API_HOST
+  else
+    url.host = env.CDN_HOST
   url.protocol = 'https:'
   url.port = ''
 

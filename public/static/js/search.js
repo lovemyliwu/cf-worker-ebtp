@@ -50,12 +50,15 @@ async function renderSearch(search_url, ) {
             } = external
             const date = post.record.createdAt
             const author = post.author.displayName
+            let image = `${location.origin}/static/img/avatar.jpg`
+            if (external?.thumb?.ref?.$link) image = `${location.origin}/img/feed_thumbnail/plain/${config.did}/${external.thumb.ref.$link}`
             return {
                 "@type": "ListItem",
                 "item": {
                     "@type": "Article",
                     "mainEntityOfPage": `${location.origin}/${rkey}`,
                     "headline": title,
+                    "image": image,
                     "datePublished": date,
                     "dateModified": date,
                     "author": [{

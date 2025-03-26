@@ -13,7 +13,7 @@ export default {
 
     // blog service
     if (url.pathname.startsWith('/static/')) return env.ASSETS.fetch(request)
-    if (url.pathname.startsWith('/xrpc/')) return bskyApiService(request, env, ctx)
+    if (url.pathname.startsWith('/xrpc/') || url.pathname.startsWith('/img/')) return bskyApiService(request, env, ctx)
     switch (url.pathname) {
       case '/config':
         return await getConfig(env)
