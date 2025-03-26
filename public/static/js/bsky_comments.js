@@ -197,6 +197,7 @@ export class BlueskyComments extends HTMLElement {
       }
       .status-bar {
         padding: 0 var(--bluesky-spacing-lg);
+        background-color: #f3f3f3;
       }
     </style>
     <div class="status-bar border-t dark:border-slate-600 w-full pt-2.5 flex items-center gap-5 text-sm ">
