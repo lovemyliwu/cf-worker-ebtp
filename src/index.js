@@ -52,6 +52,8 @@ async function getConfig(env) {
     'gate_host': env.SEARCH_DOMAIN,
     'app_host': env.APP_HOST,
     'search_page_size': env.SEARCH_PAGE_SIZE,
-    'web_app_title': env.WEB_APP_TITLE
+    'web_app_title': env.WEB_APP_TITLE,
+    'web_app_description': env.WEB_APP_DESCRIPTION,
+    'web_app_contact_email': env.WEB_APP_CONTACT_EMAIL
   })
 }

@@ -78,9 +78,12 @@ async function renderIndexPage(url) {
     utils.renderAvatar(config)
     utils.renderJSONLD({
         "@context": "https://schema.org",
-        "@type": "WebSite",
+        "@type": "Organization",
+        "url": location.origin,
+        "logo": `${location.origin}/static/img/avatar.jpg`,
         "name": config.web_app_title,
-        "url": `${location.origin}`,
+        "description": config.web_app_description,
+        "email": config.web_app_contact_email,
         "potentialAction": {
             "@type": "SearchAction",
             "target": `${location.origin}/search?q={search_term}`,

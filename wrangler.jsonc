@@ -23,6 +23,8 @@
         "APP_HOST": "app.hukoubook.com",
         "SEARCH_PAGE_SIZE": 10,
         "WEB_APP_TITLE": "再见理想",
+        "WEB_APP_DESCRIPTION": "Smite Chow的后花园，各种花花草草，各种闲情逸致。",
+        "WEB_APP_CONTACT_EMAIL": "xiaopengyou@live.com",
         "WEB_PAGE_TITLE": "${title} - 再见理想",
         "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
         "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
@@ -43,6 +45,8 @@
           "APP_HOST": "app.hukoubook.com",
           "SEARCH_PAGE_SIZE": 10,
           "WEB_APP_TITLE": "再见理想",
+          "WEB_APP_DESCRIPTION": "Smite Chow的后花园，各种花花草草，各种闲情逸致。",
+          "WEB_APP_CONTACT_EMAIL": "xiaopengyou@live.com",
           "WEB_PAGE_TITLE": "${title} - 再见理想",
           "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
           "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
