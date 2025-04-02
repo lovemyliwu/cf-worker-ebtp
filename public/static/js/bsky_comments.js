@@ -335,7 +335,7 @@ export class BlueskyComments extends HTMLElement {
       const apiUrl = `${instance}/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(
         atUri,
       )}`;
-      let headers = {'atproto-accept-labelers': this.getAttribute("lablers") ?? 'did:plc:ar7c4by46qjdydhdevvrndac;redact'}
+      let headers = {'atproto-accept-labelers': this.getAttribute("labelers") ?? 'did:plc:ar7c4by46qjdydhdevvrndac;redact'}
       const response = await fetch(apiUrl, {headers});
       if (!response.ok) {
         throw new Error("Failed to fetch replies");
