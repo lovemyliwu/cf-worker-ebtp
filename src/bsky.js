@@ -29,5 +29,7 @@ export async function handleRequest(request, env, ctx) {
     return await fakeSearch(url)
   }
 
-  return fetch(new Request(url.toString()))
+  let options = {...request, redirect: 'follow'}
+  options.headers = {...request.headers}
+  return fetch(new Request(url.toString(), options))
 }
