@@ -29,5 +29,9 @@ export async function handleRequest(request, env, ctx) {
     return await fakeSearch(url)
   }
 
-  return fetch(new Request(url.toString(), request))
+  // note: direct use request got random 500, so copy headers
+  const labelers = request.headers.get('atproto-accept-labelers')
+  let headers = {}
+  if (labelers) headers = {'atproto-accept-labelers': labelers}
+  return fetch(new Request(url.toString(), {headers}))
 }
