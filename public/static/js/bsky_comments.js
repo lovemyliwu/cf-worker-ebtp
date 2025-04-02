@@ -6,7 +6,7 @@ export class BlueskyComments extends HTMLElement {
       api_origin: { type: String },
       // default to bsky.app
       app_host: { type: String },
-      // default to official mod and china-good-voice.bsky.social labeler
+      // default to official mod
       labelers: { type: String },
     };
 
@@ -335,7 +335,7 @@ export class BlueskyComments extends HTMLElement {
       const apiUrl = `${instance}/xrpc/app.bsky.feed.getPostThread?uri=${encodeURIComponent(
         atUri,
       )}`;
-      let headers = {'atproto-accept-labelers': this.getAttribute("lablers") ?? 'did:plc:ar7c4by46qjdydhdevvrndac;redact, did:plc:dya73iwnrfdedgadx3hrulzl'}
+      let headers = {'atproto-accept-labelers': this.getAttribute("lablers") ?? 'did:plc:ar7c4by46qjdydhdevvrndac;redact'}
       const response = await fetch(apiUrl, {headers});
       if (!response.ok) {
         throw new Error("Failed to fetch replies");
