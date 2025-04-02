@@ -83,7 +83,7 @@ async function renderArticle(url) {
     ele.setAttribute('url', postAt)
     ele.setAttribute('api_origin', location.origin)
     ele.setAttribute('app_host', config.app_host)
-    ele.setAttribute('labelers', 'did:plc:ar7c4by46qjdydhdevvrndac;redact, did:web:cgv.hukoubook.com;redact')
+    ele.setAttribute('labelers', 'did:plc:ar7c4by46qjdydhdevvrndac;redact, did:web:cgv.hukoubook.com')
     document.querySelector('#comments').appendChild(ele)
 
     utils.renderAvatar(config)
