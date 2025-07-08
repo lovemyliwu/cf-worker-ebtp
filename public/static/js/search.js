@@ -31,45 +31,10 @@ async function renderKeywordSearch(url) {
     await renderSearch(search_url)
 }
 
-async function renderSearch(search_url, ) {
+async function renderSearch(search_url) {
     const response = await fetch(search_url)
     const data = await response.json()
-    renderBlogPosts(data.posts, 0)
-    utils.renderAvatar(config)
-    utils.renderJSONLD({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": document.querySelector('title').innerText,
-        "description": "符合搜索条件的文章列表",
-        "itemListElement": data.posts.map(post => {
-            const rkey = post.uri.split('/').pop()
-            const external = post.record.embed.external
-            const {
-                title,
-                description
-            } = external
-            const date = post.record.createdAt
-            const author = post.author.displayName
-            let image = `${location.origin}/static/img/avatar.jpg`
-            if (external?.thumb?.ref?.$link) image = `${location.origin}/img/feed_thumbnail/plain/${config.did}/${external.thumb.ref.$link}`
-            return {
-                "@type": "ListItem",
-                "item": {
-                    "@type": "Article",
-                    "mainEntityOfPage": `${location.origin}/${rkey}`,
-                    "headline": title,
-                    "image": image,
-                    "datePublished": date,
-                    "dateModified": date,
-                    "author": [{
-                        "@type": "Person",
-                        "name": author,
-                        "url": `${location.origin}/about`
-                    }]
-                }
-            }
-        })
-    })
+    renderBlogpostingPage(data, document.querySelector('title').innerText, "符合搜索条件的文章列表")
 }
 
 async function renderIndexPage(url) {
@@ -77,14 +42,18 @@ async function renderIndexPage(url) {
     const search_url = getSearchUrl(q)
     const response = await fetch(search_url.toString())
     const data = await response.json()
+    renderBlogpostingPage(data, config.web_app_title, config.web_app_description)
+}
+
+function renderBlogpostingPage(data, name, description) {
     renderBlogPosts(data.posts, 0)
     utils.renderAvatar(config)
     utils.renderJSONLD({
         "@context": "https://schema.org",
         "@type": "Blog",
         "url": location.origin,
-        "name": config.web_app_title,
-        "description": config.web_app_description,
+        "name": name,
+        "description": description,
         "publisher": {
             "@type": "Organization",
             "contactPoint": {
