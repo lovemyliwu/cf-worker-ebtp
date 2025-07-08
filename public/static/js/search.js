@@ -81,17 +81,47 @@ async function renderIndexPage(url) {
     utils.renderAvatar(config)
     utils.renderJSONLD({
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": "Blog",
         "url": location.origin,
-        "logo": `${location.origin}/static/img/avatar.jpg`,
         "name": config.web_app_title,
         "description": config.web_app_description,
-        "email": config.web_app_contact_email,
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": `${location.origin}/search?q={search_term}`,
-            "query-input": "required name=search_term"
-        }
+        "publisher": {
+            "@type": "Organization",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": config.web_app_contact_email
+            },
+            "description": config.web_app_description,
+            "email": config.web_app_contact_email,
+            "logo": `${location.origin}/static/img/avatar.jpg`,
+            "name": config.web_app_title,
+            "url": location.origin,
+        },
+        "blogPost": data.posts.map(post => {
+            const rkey = post.uri.split('/').pop()
+            const external = post.record.embed.external
+            const {
+                title,
+                description
+            } = external
+            const date = post.record.createdAt
+            const author = post.author.displayName
+            let image = `${location.origin}/static/img/avatar.jpg`
+            if (external?.thumb?.ref?.$link) image = `${location.origin}/img/feed_thumbnail/plain/${config.did}/${external.thumb.ref.$link}`
+            return {
+                "@type": "BlogPosting",
+                "url": `${location.origin}/${rkey}`,
+                "headline": title,
+                "image": image,
+                "datePublished": date,
+                "dateModified": date,
+                "author": [{
+                    "@type": "Person",
+                    "name": author,
+                    "url": `${location.origin}/about`
+                }]
+            }
+        })
     })
 }
 
