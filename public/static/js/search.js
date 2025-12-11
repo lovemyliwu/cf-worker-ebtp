@@ -25,10 +25,12 @@ async function renderTagSearch(url) {
 }
 
 async function renderKeywordSearch(url) {
-    utils.renderTitle(`Keyword:${url.searchParams.get('q')}`)
-    const q = `${url.searchParams.get('q')} from:${config.handle}`
-    const search_url = getSearchUrl(q)
-    await renderSearch(search_url)
+    // utils.renderTitle(`Keyword:${url.searchParams.get('q')}`)
+    // const q = `${url.searchParams.get('q')} from:${config.handle}`
+    // const search_url = getSearchUrl(q)
+    // await renderSearch(search_url)
+    const q = `site:blog.smitechow.com ${url.searchParams.get('q')}`
+    location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`
 }
 
 async function renderSearch(search_url) {

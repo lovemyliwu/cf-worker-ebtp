@@ -53,7 +53,12 @@ function aboutPage(html) {
 关于
 </h2>
 <div class="markdown-body">
-Bluesky账号：@smitechow.com
+Bluesky账号：<a href="https://app.hukoubook.com/profile/smitechow.com">@smitechow.com</a>
+<blockquote>
+<p>
+由于我的账号被bluesky屏蔽了，所以你无法直接通过bluesky找到我，请使用<a href="https://app.hukoubook.com">Fatesky</a>
+</p>
+</blockquote>
 </div>
 </div>
 </div>
