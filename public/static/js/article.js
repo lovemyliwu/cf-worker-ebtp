@@ -81,7 +81,7 @@ async function renderArticle(url) {
     const postAt = `at://${config.did}/app.bsky.feed.post/${rkey}`
     let ele = document.createElement('bluesky-comments')
     ele.setAttribute('url', postAt)
-    ele.setAttribute('api_origin', location.origin)
+    ele.setAttribute('api_origin', config.api_origin)
     ele.setAttribute('app_host', config.app_host)
     ele.setAttribute('labelers', 'did:plc:ar7c4by46qjdydhdevvrndac;redact, did:web:cgv.hukoubook.com')
     document.querySelector('#comments').appendChild(ele)

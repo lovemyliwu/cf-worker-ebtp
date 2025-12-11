@@ -32,21 +32,32 @@ async function renderKeywordSearch(url) {
 }
 
 async function renderSearch(search_url) {
-    const response = await fetch(search_url)
-    const data = await response.json()
-    renderBlogpostingPage(data, document.querySelector('title').innerText, "符合搜索条件的文章列表")
+    // const response = await fetch(search_url)
+    // const data = await response.json()
+    const data = {posts: []}
+    renderBlogpostingPage(null, data, document.querySelector('title').innerText, "符合搜索条件的文章列表")
 }
 
 async function renderIndexPage(url) {
-    const q = `from:${config.handle}`
-    const search_url = getSearchUrl(q)
-    const response = await fetch(search_url.toString())
+    const api = new URL(`${config.api_origin}/xrpc/app.bsky.feed.getFeed`)
+    api.searchParams.set('feed', 'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot')
+    api.searchParams.set('limit', url.searchParams.get('limit') ?? config.search_page_size)
+    api.searchParams.set('xfeed', config.index_feed)
+    if (url.searchParams.get('cursor'))
+      api.searchParams.set('cursor', url.searchParams.get('cursor'))
+
+    const response = await fetch(api)
     const data = await response.json()
-    renderBlogpostingPage(data, config.web_app_title, config.web_app_description)
+    renderBlogpostingPage(
+      data.cursor,
+      { posts: data.feed.map(item => item.post) },
+      config.web_app_title,
+      config.web_app_description
+    )
 }
 
-function renderBlogpostingPage(data, name, description) {
-    renderBlogPosts(data.posts, 0)
+function renderBlogpostingPage(apiCursor, data, name, description) {
+    renderBlogPosts(data.posts, 0, apiCursor)
     utils.renderAvatar(config)
     utils.renderJSONLD({
         "@context": "https://schema.org",
@@ -94,7 +105,7 @@ function renderBlogpostingPage(data, name, description) {
     })
 }
 
-function renderBlogPosts(allPosts, cursor) {
+function renderBlogPosts(allPosts, cursor, apiCursor) {
     if (!allPosts.length) {
         document.querySelector('#postsContainer').innerHTML = '<div class="rich_media_area_primary">没有找到任何文章，<a href="/">回到主页</a></div>'
         document.querySelector('.navigator').style.display = 'none'
@@ -131,7 +142,16 @@ function renderBlogPosts(allPosts, cursor) {
             renderBlogPosts(allPosts, cursor + config.search_page_size);
         }
         document.querySelector('#nextCursor').style.display = 'inline'
-    } else {
+    }
+    else if (apiCursor) {
+      document.querySelector('#nextCursor').onclick = event => {
+          const url = new URL(location.href)
+          url.searchParams.set('cursor', apiCursor)
+          location.href = url
+      }
+      document.querySelector('#nextCursor').style.display = 'inline'
+    }
+    else {
         document.querySelector('#nextCursor').style.display = 'none'
     }
 

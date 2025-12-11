@@ -1,5 +1,4 @@
 import { handleRequest as gateService } from './gate.js'
-import { handleRequest as bskyApiService } from './bsky.js'
 import { json } from './utils.js'
 import { HTMLTagRewriter, TitleRewriter, FooterRewriter, AppTitleRewriter } from './rewriter.js'
 import { handleRequest as pageService } from './page.js'
@@ -13,7 +12,7 @@ export default {
 
     // blog service
     if (url.pathname.startsWith('/static/')) return env.ASSETS.fetch(request)
-    if (url.pathname.startsWith('/xrpc/') || url.pathname.startsWith('/img/')) return bskyApiService(request, env, ctx)
+
     switch (url.pathname) {
       case '/config':
         return await getConfig(env)
@@ -21,7 +20,11 @@ export default {
         return await getData(env, url)
     }
     const res = await pageService(request, env, ctx)
-    const rewriter = new HTMLRewriter().on('html', new HTMLTagRewriter(env)).on('title', new TitleRewriter(env, request.url)).on('footer', new FooterRewriter(env)).on('.app-title', new AppTitleRewriter(env))
+    const rewriter = new HTMLRewriter()
+      .on('html', new HTMLTagRewriter(env))
+      .on('title', new TitleRewriter(env, request.url))
+      .on('footer', new FooterRewriter(env))
+      .on('.app-title', new AppTitleRewriter(env))
     return rewriter.transform(res)
   }
 };
@@ -49,11 +52,13 @@ async function getConfig(env) {
   const data = await response.json()
   return json({
     ...data,
-    'gate_host': env.SEARCH_DOMAIN,
+    'gate_host': env.GATE_HOST,
     'app_host': env.APP_HOST,
     'search_page_size': env.SEARCH_PAGE_SIZE,
     'web_app_title': env.WEB_APP_TITLE,
     'web_app_description': env.WEB_APP_DESCRIPTION,
-    'web_app_contact_email': env.WEB_APP_CONTACT_EMAIL
+    'web_app_contact_email': env.WEB_APP_CONTACT_EMAIL,
+    'index_feed': env.INDEX_FEED,
+    'api_origin': `https://${env.API_HOST}`
   })
 }
