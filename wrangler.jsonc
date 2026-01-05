@@ -27,7 +27,7 @@
         "WEB_APP_CONTACT_EMAIL": "xiaopengyou@live.com",
         "WEB_PAGE_TITLE": "${title} - 再见理想",
         "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
-        "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
+        "WEB_PAGE_FOOTER": "© 2026 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
     },
     "env": {
       "production": {
@@ -49,7 +49,7 @@
           "WEB_APP_CONTACT_EMAIL": "xiaopengyou@live.com",
           "WEB_PAGE_TITLE": "${title} - 再见理想",
           "WEB_PAGE_CONTENT_LANGUAGE": "zh-CN",
-          "WEB_PAGE_FOOTER": "© 2025 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
+          "WEB_PAGE_FOOTER": "© 2026 Smite Chow, Write with ❤️️ Power by atproto & ebtp"
         }
       }
     }
