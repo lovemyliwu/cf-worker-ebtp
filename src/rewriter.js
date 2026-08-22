@@ -6,7 +6,7 @@ export class FooterRewriter {
   }
 
   element(element) {
-    element.setInnerContent(this.env.WEB_PAGE_FOOTER)
+    element.setInnerContent(this.env.WEB_PAGE_FOOTER, { html: true })
   }
 }
 
